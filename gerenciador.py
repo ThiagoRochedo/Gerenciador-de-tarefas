@@ -1,4 +1,21 @@
+import json
+
+
 tarefas = []
+
+
+def salvar_tarefas():
+    with open("tarefas.json", "w") as arquivo:
+        json.dump(tarefas, arquivo)
+
+
+def carregar_tarefas():
+    try:
+        with open("tarefas.json", "r") as arquivo:
+            return json.load(arquivo)
+    except FileNotFoundError:
+        return []
+
 
 def adicionar_tarefa():
     nome = input("Nome da tarefa: ")
@@ -9,13 +26,24 @@ def adicionar_tarefa():
       prioridade = input("Prioridade da tarefa (baixa/média/alta): ").lower()
     status = "pendente"  # Padrão ao adicionar uma tarefa
     tarefas.append({"nome": nome, "descricao": descricao, "prioridade": prioridade, "status": status})
+    salvar_tarefas()  
+
 
 def atualizar_tarefa():
     mostrar_tarefas()
-    id_tarefa = int(input("Digite o ID da tarefa que deseja atualizar: "))
+    id_tarefa_str = input("Digite o ID da tarefa que deseja atualizar: ")
+
+    # Verificar se a entrada é um número
+    if not id_tarefa_str.isdigit():
+        print("ID inválido. Digite um número.")
+        return
+
+    id_tarefa = int(id_tarefa_str)
+
     if id_tarefa < 1 or id_tarefa > len(tarefas):
         print("ID inválido.")
         return
+
     tarefa = tarefas[id_tarefa - 1]
     print("Informações atuais da tarefa:")
     exibir_tarefa(tarefa)
@@ -24,6 +52,8 @@ def atualizar_tarefa():
     tarefa[campo_para_atualizar] = novo_valor
     print("Tarefa atualizada com sucesso.")
     exibir_tarefa(tarefa)
+    salvar_tarefas()  # Salvar as tarefas após atualizar
+
 
 def excluir_tarefa():
     mostrar_tarefas()
@@ -34,6 +64,8 @@ def excluir_tarefa():
     tarefa = tarefas.pop(id_tarefa - 1)
     print("Tarefa excluída com sucesso:")
     exibir_tarefa(tarefa)
+    salvar_tarefas()
+
 
 def mostrar_tarefas():
     print("\nLista de Tarefas:")
@@ -41,12 +73,14 @@ def mostrar_tarefas():
         print(f"ID: {i}")
         exibir_tarefa(tarefa)
 
+
 def exibir_tarefa(tarefa):
     print(f"Nome: {tarefa['nome']}")
     print(f"Descrição: {tarefa['descricao']}")
     print(f"Prioridade: {tarefa['prioridade']}")
     print(f"Status: {tarefa['status']}")
     print("-----------")
+
 
 def filtrar_tarefas():
     status_filtro = input("Filtrar por status (pendente/concluída): ").lower()
@@ -58,11 +92,13 @@ def filtrar_tarefas():
     for tarefa in tarefas_filtradas:
         exibir_tarefa(tarefa)
 
+
 def priorizar_tarefas():
     tarefas_ordenadas = sorted(tarefas, key=lambda x: ("alta", "média", "baixa").index(x["prioridade"]))
     print("\nLista de Tarefas Priorizadas:")
     for tarefa in tarefas_ordenadas:
         exibir_tarefa(tarefa)
+
 
 def estatisticas_tarefas():
     total_tarefas = len(tarefas)
@@ -74,6 +110,7 @@ def estatisticas_tarefas():
     print(f"Tarefas Pendentes: {tarefas_pendentes}")
     print(f"Tarefas Concluídas: {tarefas_concluidas}")
 
+
 def exibir_menu():
     print("\nEscolha uma opção:")
     print("1. Adicionar Tarefa")
@@ -84,6 +121,9 @@ def exibir_menu():
     print("6. Priorizar Tarefas")
     print("7. Estatísticas das Tarefas")
     print("0. Sair")
+
+tarefas = carregar_tarefas()
+
 
 while True:
     exibir_menu()
